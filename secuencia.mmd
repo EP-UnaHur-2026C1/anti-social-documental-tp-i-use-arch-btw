@@ -1,0 +1,47 @@
+sequenceDiagram
+    autonumber
+    actor Cliente as 🧑‍💻 Cliente / Front-end
+
+    box rgb(40,44,52) 1. Capa de Red (HTTP)
+        participant Ruta as 🌐 Routes
+        participant Middleware as 🛡️ Middlewares
+        participant Ctrl as 🎮 Controllers
+    end
+
+    box rgb(45,55,72) 2. Capa de Negocio
+        participant Svc as 🧠 Services
+    end
+
+    box rgb(26,54,93) 3. Capa de Datos
+        participant Repo as 📦 Repositories
+        participant DB as 🗄️ Models (Sequelize)
+    end
+
+%% Responsabilidades de cada capa
+    Note over Ruta: Define los puntos de entrada de la API<br/>Delaga al middleware correspondiente
+    Note over Middleware: Valida el formato de los datos entrantes<br/>con esquemas Joi antes de dejar pasar
+    Note over Ctrl: Recibe la petición ya validada,<br/>invoca al servicio y arma la respuesta HTTP
+    Note over Svc: Contiene toda la lógica de negocio.<br/>Orquesta validaciones y operaciones
+    Note over Repo: Abstrae el acceso a la base de datos.<br/>Aísla al Service del ORM
+    Note over DB: Modelos Sequelize que representan<br/>las tablas de la base de datos (SQLite)
+
+%% Inicio del flujo de una petición exitosa
+    Cliente->>Ruta: POST /api/posts { "description": "Hola" }
+    Ruta->>Middleware: Ejecuta el validador correspondiente
+
+    alt ❌ Datos inválidos
+        Middleware-->>Cliente: 400 Bad Request + errores de validación
+    else ✅ Datos válidos
+        Middleware->>Ctrl: next() — datos limpios y listos
+        Ctrl->>Svc: postService.createPost(req.body)
+
+        Note over Svc: Verifica reglas de negocio<br/>(usuario existe, duplicados, etc.)
+
+        Svc->>Repo: postRepository.create(data)
+        Repo->>DB: Post.create(postData)
+        DB-->>Repo: Instancia guardada
+        Repo-->>Svc: Objeto resultante
+
+        Svc-->>Ctrl: Resultado procesado
+        Ctrl-->>Cliente: 201 Created + datos del post creado
+    end
