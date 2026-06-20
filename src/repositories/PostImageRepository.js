@@ -1,11 +1,17 @@
 const { PostImage } = require('../models');
 
 class PostImageRepository {
-    async create(data) {}
+    async create(data) {
+        return PostImage.create(data)
+    }
 
-    async findById(id) {}
+    async findById(id) {
+        return PostImage.findOne({ _id:id }).lean()
+    }
 
-    async deleteById(id) {}
+    async deleteById(id) {
+        return PostImage.deleteOne({ _id:id })
+    }
 }
 
 module.exports = new PostImageRepository();

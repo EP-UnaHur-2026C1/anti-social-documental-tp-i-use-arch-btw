@@ -4,19 +4,40 @@ const getVisibleCommentsWhere = () => {
     const months = Number(process.env.COMMENT_VISIBILITY_MONTHS) || 6;
     const cutoff = new Date();
     cutoff.setMonth(cutoff.getMonth() - months);
-    return { dateTime: { [Op.gte]: cutoff } };
+    return { dateTime: { $gte: cutoff } };
 };
 
 class PostRepository {
-    async findAll() {}
+    async findAll() {
+        return Post.find().populate ({
+                            path: 'comments',
+                            match: getVisibleCommentsWhere()
+                                    }).lean();
+    }
 
-    async findById(id) {}
+    async findById(id) {
+        return Post.findOne({ _id:id }).populate ({
+                            path: 'comments',
+                            match: getVisibleCommentsWhere()
+                                    }).lean();
+    }
 
-    async create(data) {}
+    async create(data) {
+        return Post.create(data);
+    }
 
-    async update(post, data) {}
+    async update(id, data) {
+        const post = await Post.findById(id);
+        
+        if (!post) return null;
 
-    async deleteById(id) {}
+        Object.assign(post, data);
+        return await post.save();
+    }
+
+    async deleteById(id) {
+        return Post.deleteOne({ _id: id });
+    }
 }
 
 module.exports = new PostRepository();
