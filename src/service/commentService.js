@@ -3,22 +3,12 @@ const commentRepository = require('../repositories/CommentRepository');
 
 class CommentService {
     async createComment(commentData) {
-        const existingComment = await commentRepository.findByContent(
-            commentData.content
-        );
-        if (existingComment) {
-            throw new AppError(
-                'El comentario con ese contenido ya está registrado.',
-                409
-            );
-        }
         const newComment = await commentRepository.create(commentData);
         return newComment;
     }
 
-    async getComments() {
-        const comments = await commentRepository.findAll();
-        return comments;
+    async getComments(page = 1, limit = 20) {
+        return commentRepository.findAll(page, limit);
     }
 
     async updateComment(id, commentData) {
@@ -30,8 +20,8 @@ class CommentService {
     }
 
     async deleteComment(id) {
-        const comment = await commentRepository.delete(id);
-        if (!comment) {
+        const comment = await commentRepository.deleteById(id);
+        if (!comment.deletedCount) {
             throw new AppError(`Comentario con id ${id} no encontrado.`, 404);
         }
         return comment;

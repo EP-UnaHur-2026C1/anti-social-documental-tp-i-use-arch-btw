@@ -1,70 +1,146 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/r_d7sOXe)
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/I9P6ejM-)
 
-# UnaHur - Red Anti-Social - 2026 - C1
+![Node.js](https://img.shields.io/badge/Node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
+![pnpm](https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white)
+![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white)
+![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=for-the-badge&logo=prettier&logoColor=black)
 
-Se solicita el modelado y desarrollo de un sistema backend para una red social llamada **“UnaHur Anti-Social Net”**, inspirada en plataformas populares que permiten a los usuarios realizar publicaciones y recibir comentarios sobre las mismas.
+# UnaHur Anti-Social Net
+
+Backend de una red social, hecha con Node.js + Express + Mongoose. Sigue el patrón **Controller → Service → Repository** para mantener las capas bien separadas y que el código sea más mantenible.
 
 ![Imagen](./assets/ANTI-SOCIALNET.jpeg)
 
-# Contexto del Proyecto
+## Descripción
 
-En una primera reunión con los sponsors del proyecto, se definieron los siguientes requerimientos para el desarrollo de un **MVP (Producto Mínimo Viable)**:
+Esto es el **MVP** de la **"UnaHur Anti-Social Net"**, una red social inspirada en plataformas populares.
+La idea es que la gente pueda:
 
-- El sistema debe permitir que un usuario registrado realice una publicación (post), incluyendo **obligatoriamente una descripción**. De forma opcional, se podrán asociar **una o más imágenes** a dicha publicación.
+- Crear posts con descripción y opcionalmente mandar imágenes.
+- Comentar los posts de otros.
+- Etiquetar posts con tags.
+- Seguirse entre usuarios.
 
-- Las publicaciones pueden recibir **comentarios** por parte de otros usuarios.
+## Arquitectura
 
-- Las publicaciones pueden estar asociadas a **etiquetas (tags)**. Una misma etiqueta puede estar vinculada a múltiples publicaciones.
+```
+src/
+├── config/         → Conexión a MongoDB vía Mongoose
+├── controllers/    → La capa que recibe los requests y llama a los services
+├── helpers/        → Utils: manejo de errores y respuestas estandarizadas
+├── middlewares/    → Error handler, validator, catchAsync
+├── models/         → Schemas de Mongoose (User, Post, Comment, Tag, etc.)
+├── repositories/   → Capa de acceso a datos (queries con Mongoose)
+├── routes/         → Definición de endpoints
+├── service/        → Lógica de negocio
+├── main.js         → Entry point del server
+└── swagger.js      → Configuración de Swagger (carga openapi.yaml)
+```
 
-- Es importante que los **comentarios más antiguos que X meses** (valor configurable mediante variables de entorno, por ejemplo, 6 meses) **no se muestren** en la visualización de los posteos.
+## Entidades
 
-####
+| Entidad       | Colección en MongoDB | Descripción |
+|---------------|----------------------|-------------|
+| **User**      | `users`              | Usuarios registrados. `_id` es el nickName. |
+| **Post**      | `posts`              | Publicaciones con descripción obligatoria y fecha. |
+| **PostImage** | `postimages`         | Imágenes asociadas a un post. |
+| **Comment**   | `comments`           | Comentarios en posts. Tienen un `visible` que depende de la config de meses. |
+| **Tag**       | `tags`               | Etiquetas reutilizables. |
+| **PostTag**   | `posttags`           | Relación muchos-a-muchos entre posts y tags. |
+| **Follow**    | `follows`            | Seguimiento entre usuarios. |
 
-# Entidades y Reglas de Negocio
+### Diagrama Entidad-Relación
 
-Los sponsors definieron los siguientes nombres y descripciones para las entidades:
+```mermaid
+erDiagram
+    USER ||--o{ POST : "publica"
+    USER ||--o{ COMMENT : "escribe"
+    USER ||--o{ FOLLOW : "sigue"
+    USER ||--o{ FOLLOW : "es seguido"
+    POST ||--o{ POSTIMAGE : "contiene"
+    POST ||--o{ COMMENT : "recibe"
+    POST ||--o{ POSTTAG : "tiene"
+    TAG ||--o{ POSTTAG : "asignado a"
+```
 
-- **User**: Representa a los usuarios registrados en el sistema. El campo `nickName` debe ser **único** y funcionará como identificador principal del usuario.
+## Cómo levantar esto
 
-- **Post**: Publicación realizada por un usuario en una fecha determinada que contiene el texto que desea publicar. Puede tener **cero o más imágenes** asociadas. Debe contemplarse la posibilidad de **agregar o eliminar imágenes** posteriormente.
+```bash
+# 1. Clonás el repo
+git clone <repo-url>
+cd anti-social-documental-tp-i-use-arch-btw
 
-- **Post_Images**: Entidad que registra las imágenes asociadas a los posts. Para el MVP, solo se requiere almacenar la **URL de la imagen alojada**.
+# 2. Instalás las dependencias
+pnpm install
 
-- **Comment**: Comentario que un usuario puede realizar sobre una publicación. Incluye la fecha en la que fue realizado y una indicación de si está **visible o no**, dependiendo de la configuración (X meses).
+# 3. Configurás las variables de entorno (copiás el .env.example)
+cp .env.example .env
 
-- **Tag**: Etiqueta que puede ser asignada a un post. Una etiqueta puede estar asociada a **muchos posts**, y un post puede tener **múltiples etiquetas**.
+# 4. Levantás MongoDB con Docker
+docker compose up -d
 
-# Requerimientos Técnicos
+# 5. Lo prendés
+pnpm run dev
+```
 
-1. **Modelado de Datos**
-    - Diseñar el modelo documental que represtente todas las entidades definidas por los sponsor del proyecto. Queda a su criterio si usan relaciones embebidas o relaciones referenciadas a otros documentos.
+El server arranca en `http://localhost:3000` y la docu de Swagger en `http://localhost:3000/api-docs`.
 
-### Ejemplo referenciadas
+## Variables de Entorno
 
-![referenciadas](./assets/Referenciada.png)
+| Variable                      | Default                                                | Descripción |
+|-------------------------------|--------------------------------------------------------|-------------|
+| `PORT`                        | `3000`                                                 | Puerto del server |
+| `NODE_ENV`                    | `development`                                          | Entorno |
+| `MONGO_URI`                   | `mongodb://root:admin@localhost:27017/anti-social?authSource=admin` | URI de conexión a MongoDB |
+| `COMMENT_VISIBILITY_MONTHS`   | `6`                                                    | Meses de visibilidad de comentarios |
 
-2. **Desarrollo del Backend**
-    - Crear los **endpoints CRUD** necesarios para cada entidad.
+## Endpoints
 
-    - Implementar las rutas necesarias para gestionar las relaciones entre entidades (por ejemplo: asociar imágenes a un post, etiquetas a una publicación, etc.).
+### Users
+- `GET /api/users` — Lista todos los usuarios
+- `GET /api/users/:nickName` — Busca un user por nick
+- `GET /api/users/:nickName/posts` — Posts de un usuario
+- `GET /api/users/:nickName/comments` — Comentarios de un usuario
+- `POST /api/users` — Crea un usuario
+- `PUT /api/users/:nickName` — Actualiza un usuario
+- `DELETE /api/users/:nickName` — Borra un usuario
 
-    - Desarrollar las validaciones necesarias para asegurar la integridad de los datos (schemas, validaciones de integridad referencial).
+### Posts
+- `GET /api/posts` — Lista todos los posts (paginado: `?page=1&limit=20`)
+- `GET /api/posts/:id` — Busca un post por ID
+- `GET /api/posts/:id/comments` — Comentarios de un post (paginado)
+- `POST /api/posts` — Crea un post (con imágenes y tags opcionales)
+- `PUT /api/posts/:id` — Actualiza un post
+- `DELETE /api/posts/:id` — Borra un post
+- `POST /api/posts/:id/images` — Agrega una imagen
+- `DELETE /api/posts/:id/images/:imageId` — Elimina una imagen
+- `POST /api/posts/:id/tags` — Agrega un tag
+- `DELETE /api/posts/:id/tags/:tagId` — Elimina un tag
 
-    - Desarrollar las funciones controladoras con una única responsabiliad evitando realizar comprobaciones innecesarias en esta parte del código.
+### Comments
+- `GET /api/comments` — Lista comentarios (paginado: `?page=1&limit=20`)
+- `POST /api/comments` — Crea un comentario
+- `PUT /api/comments/:id` — Actualiza un comentario
+- `DELETE /api/comments/:id` — Borra un comentario
 
-3. **Configuración y Portabilidad**
-    - La configuración de las variables del motor deben ser por configuración e instalación de dependencias adecuadas.
+### Tags
+- `GET /api/tags` — Lista tags (paginado: `?page=1&limit=20`)
+- `POST /api/tags` — Crea un tag
+- `DELETE /api/tags/:id` — Borra un tag
 
-    - El sistema debe permitir configurar el **puerto de ejecución y variables de entorno** fácilmente.
+### Follow
+- `GET /api/follow/:nick/followers` — Seguidores de un usuario (paginado)
+- `GET /api/follow/:nick/following` — Usuarios que sigue (paginado)
+- `POST /api/follow/:followerNick/:followingNick` — Seguir a alguien
+- `DELETE /api/follow/:followerNick/:followingNick` — Dejar de seguir
 
-4. **Documentación**
-    - Generar la documentación de la API utilizando **Swagger (formato YAML)**, incluyendo todos los endpoints definidos.
+> Para más detalle, cuando el server esté corriendo entra a `/api-docs`.
 
-5. **Colecciones de Prueba**
-    - Entregar las colecciones necesarias para realizar pruebas (por ejemplo, colecciones de Postman o archivos JSON de ejemplo).
+## Testing
 
-# Bonus
-
-- Hace el upload de las imganes que se asocian a un POST que lo guarden en una carpeta de imagenes dentro del servidor web.
-- ¿Cómo modelarías que un usuario pueda "seguir" a otros usuarios, y a su vez ser seguido por muchos? Followers
-- Con la información de los post no varia muy seguido que estrategias podrian utilizar la que la información no sea constantemente consultada desde la base de datos.
+En la raíz del proyecto está el archivo `Antisocial.postman_collection.json` con todos los endpoints para importar en Postman y probar todo.

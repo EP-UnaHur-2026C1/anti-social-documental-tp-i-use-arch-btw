@@ -1,10 +1,11 @@
 const commentService = require('../service/commentService');
 const catchAsync = require('../middlewares/catchAsync');
-const { created, success, ok } = require('../helpers/response');
+const { created, success, ok, noContent } = require('../helpers/response');
+const { paginated } = require('../helpers/pagination');
 
 exports.createComment = catchAsync(async (req, res) => {
     const newComment = await commentService.createComment(req.body);
-    return created(res, newComment, '✅ Comentario creado con éxito.');
+    return created(res, newComment, 'Comentario creado con éxito.');
 });
 
 exports.updateComment = catchAsync(async (req, res) => {
@@ -12,19 +13,17 @@ exports.updateComment = catchAsync(async (req, res) => {
         req.params.id,
         req.body
     );
-    return success(res, updatedComment, '✅ Comentario actualizado con éxito.');
+    return success(res, updatedComment, 'Comentario actualizado con éxito.');
 });
 
 exports.getComments = catchAsync(async (req, res) => {
-    const comments = await commentService.getComments();
-    return ok(res, comments);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const { data, total } = await commentService.getComments(page, limit);
+    return paginated(res, data, total, page, limit);
 });
 
 exports.deleteComment = catchAsync(async (req, res) => {
-    const comment = await commentService.deleteComment(req.params.id);
-    return success(
-        res,
-        comment,
-        `✅ Comentario con id ${req.params.id} eliminado con éxito.`
-    );
+    await commentService.deleteComment(req.params.id);
+    return noContent(res);
 });

@@ -1,0 +1,594 @@
+{
+    "info": {
+        "name": "Antisocial API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "0 - Setup inicial (users + tags)",
+            "item": [
+                {
+                    "name": "Crear usuarios",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const users = JSON.parse(pm.request.body.raw);",
+                                    "const results = [];",
+                                    "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                                    "const requests = users.map(user =>",
+                                    "    new Promise(resolve => {",
+                                    "        pm.sendRequest({",
+                                    "            url: baseUrl + '/api/users',",
+                                    "            method: 'POST',",
+                                    "            header: { 'Content-Type': 'application/json' },",
+                                    "            body: { mode: 'raw', raw: JSON.stringify(user) }",
+                                    "        }, (err, res) => {",
+                                    "            results.push({ user: user.nickName, status: res.code });",
+                                    "            resolve();",
+                                    "        });",
+                                    "    })",
+                                    ");",
+                                    "Promise.all(requests).then(() => {",
+                                    "    pm.response.setBody({ created: results });",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "[{\"nickName\":\"lean\",\"email\":\"lean@gmail.com\",\"name\":\"Leandro\",\"surname\":\"Fernández\"},{\"nickName\":\"gabriel\",\"email\":\"gab@gmail.com\",\"name\":\"Gabriel\",\"surname\":\"Herrera\"},{\"nickName\":\"Luna\",\"email\":\"luna@gmail.com\",\"name\":\"Luna\",\"surname\":\"Moon\"},{\"nickName\":\"juan\",\"email\":\"juan@gmail.com\",\"name\":\"Juan\",\"surname\":\"Pérez\"},{\"nickName\":\"maria\",\"email\":\"maria@gmail.com\",\"name\":\"María\",\"surname\":\"García\"}]"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/users",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "users"]
+                        }
+                    }
+                },
+                {
+                    "name": "Crear tags",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const tags = ['programming', 'travel', 'food', 'music', 'fitness'];",
+                                    "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                                    "const requests = tags.map(name =>",
+                                    "    new Promise(resolve => {",
+                                    "        pm.sendRequest({",
+                                    "            url: baseUrl + '/api/tags',",
+                                    "            method: 'POST',",
+                                    "            header: { 'Content-Type': 'application/json' },",
+                                    "            body: { mode: 'raw', raw: JSON.stringify({ name }) }",
+                                    "        }, (err, res) => {",
+                                    "            try {",
+                                    "                const data = typeof res.json().data === 'object' ? res.json().data : res.json();",
+                                    "                pm.collectionVariables.set('tag_' + name, data._id);",
+                                    "            } catch(e) {}",
+                                    "            resolve();",
+                                    "        });",
+                                    "    })",
+                                    ");",
+                                    "Promise.all(requests).then(() => {",
+                                    "    pm.response.setBody({ message: 'Tags creados' });",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"name\":\"dummy\"}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/tags",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "tags"]
+                        }
+                    }
+                },
+                {
+                    "name": "Obtener todos los usuarios",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/users",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "users"]
+                        }
+                    }
+                },
+                {
+                    "name": "Obtener todos los tags",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/tags",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "tags"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "1 - Follows",
+            "item": [
+                {
+                    "name": "Luna sigue a lean",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/follow/Luna/lean",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "follow", "Luna", "lean"]
+                        }
+                    }
+                },
+                {
+                    "name": "gabriel sigue a lean",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/follow/gabriel/lean",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "follow", "gabriel", "lean"]
+                        }
+                    }
+                },
+                {
+                    "name": "juan sigue a Luna",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/follow/juan/Luna",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "follow", "juan", "Luna"]
+                        }
+                    }
+                },
+                {
+                    "name": "Obtener usuarios (ver followers)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/users",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "users"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2 - Posts",
+            "item": [
+                {
+                    "name": "Post lean - programming",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const data = pm.response.json();",
+                                    "const id = data._id || (data.data && data.data._id);",
+                                    "if (id) pm.collectionVariables.set('postId1', id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"user_nickName\":\"lean\",\"description\":\"Aprendiendo Mongoose con Node.js!\",\"images\":[\"https://picsum.photos/seed/code1/400/300\"],\"tags\":[\"programming\"]}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts"]
+                        }
+                    }
+                },
+                {
+                    "name": "Post Luna - travel",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const data = pm.response.json();",
+                                    "const id = data._id || (data.data && data.data._id);",
+                                    "if (id) pm.collectionVariables.set('postId2', id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"user_nickName\":\"Luna\",\"description\":\"Mi viaje a la playa! 🏖️\",\"images\":[\"https://picsum.photos/seed/beach1/400/300\"],\"tags\":[\"travel\"]}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts"]
+                        }
+                    }
+                },
+                {
+                    "name": "Post gabriel - food",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const data = pm.response.json();",
+                                    "const id = data._id || (data.data && data.data._id);",
+                                    "if (id) pm.collectionVariables.set('postId3', id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"user_nickName\":\"gabriel\",\"description\":\"Hice pasta casera hoy!\",\"images\":[\"https://picsum.photos/seed/food1/400/300\",\"https://picsum.photos/seed/food2/400/300\"],\"tags\":[\"food\"]}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts"]
+                        }
+                    }
+                },
+                {
+                    "name": "Post juan - music",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const data = pm.response.json();",
+                                    "const id = data._id || (data.data && data.data._id);",
+                                    "if (id) pm.collectionVariables.set('postId4', id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"user_nickName\":\"juan\",\"description\":\"Nueva playlist en Spotify!\",\"images\":[],\"tags\":[\"music\"]}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts"]
+                        }
+                    }
+                },
+                {
+                    "name": "Obtener todos los posts",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts"]
+                        }
+                    }
+                },
+                {
+                    "name": "Ver postId1 en detalle",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts/{{postId1}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts", "{{postId1}}"]
+                        }
+                    }
+                },
+                {
+                    "name": "Actualizar postId1",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"description\":\"Descripción actualizada del post!\"}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts/{{postId1}}",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts", "{{postId1}}"]
+                        }
+                    }
+                },
+                {
+                    "name": "Agregar imagen a postId1",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"url\":\"https://picsum.photos/seed/newimg/400/300\"}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts/{{postId1}}/images",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts", "{{postId1}}", "images"]
+                        }
+                    }
+                },
+                {
+                    "name": "Agregar tag programming a postId2",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const data = pm.response.json();",
+                                    "const id = data._id || (data.data && data.data._id);",
+                                    "if (id) pm.collectionVariables.set('postTagId', id);"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"tag_id\":\"{{tag_programming}}\"}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts/{{postId2}}/tags",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts", "{{postId2}}", "tags"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3 - Comments",
+            "item": [
+                {
+                    "name": "Crear comentarios",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                                    "const p1 = pm.collectionVariables.get('postId1');",
+                                    "const p2 = pm.collectionVariables.get('postId2');",
+                                    "const p3 = pm.collectionVariables.get('postId3');",
+                                    "const p4 = pm.collectionVariables.get('postId4');",
+                                    "const comments = [",
+                                    "  { user_nickName: 'Luna', post_id: p1, content: 'Qué bien se ve ese código!' },",
+                                    "  { user_nickName: 'gabriel', post_id: p1, content: 'Compartí el repo!' },",
+                                    "  { user_nickName: 'lean', post_id: p2, content: 'Hermosa playa! 🌊' },",
+                                    "  { user_nickName: 'juan', post_id: p2, content: 'Dónde es eso?' },",
+                                    "  { user_nickName: 'Luna', post_id: p3, content: 'Pasá la receta!' },",
+                                    "  { user_nickName: 'lean', post_id: p3, content: 'Se ve delicioso 🤤' },",
+                                    "  { user_nickName: 'maria', post_id: p4, content: 'Pasá el link!' }",
+                                    "];",
+                                    "const results = [];",
+                                    "const requests = comments.map(c =>",
+                                    "    new Promise(resolve => {",
+                                    "        pm.sendRequest({",
+                                    "            url: baseUrl + '/api/comments',",
+                                    "            method: 'POST',",
+                                    "            header: { 'Content-Type': 'application/json' },",
+                                    "            body: { mode: 'raw', raw: JSON.stringify(c) }",
+                                    "        }, (err, res) => {",
+                                    "            results.push({ content: c.content, status: res.code });",
+                                    "            resolve();",
+                                    "        });",
+                                    "    })",
+                                    ");",
+                                    "Promise.all(requests).then(() => {",
+                                    "    pm.response.setBody({ created: results });",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\"user_nickName\":\"lean\",\"post_id\":\"{{postId1}}\",\"content\":\"test\"}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/comments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "comments"]
+                        }
+                    }
+                },
+                {
+                    "name": "Obtener todos los comentarios",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/comments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "comments"]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "4 - Posts / Comments / Follows",
+            "item": [
+                {
+                    "name": "Posts (con comentarios visibles)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts"]
+                        }
+                    }
+                },
+                {
+                    "name": "Comentarios del postId1",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts/{{postId1}}/comments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "posts", "{{postId1}}", "comments"]
+                        }
+                    }
+                },
+                {
+                    "name": "Posts de lean",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/users/lean/posts",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "users", "lean", "posts"]
+                        }
+                    }
+                },
+                {
+                    "name": "Comentarios de Luna",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/users/Luna/comments",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "users", "Luna", "comments"]
+                        }
+                    }
+                },
+                {
+                    "name": "Seguidores de lean",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/follow/lean/followers",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "follow", "lean", "followers"]
+                        }
+                    }
+                },
+                {
+                    "name": "Seguidos de Luna",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/follow/Luna/following",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api", "follow", "Luna", "following"]
+                        }
+                    }
+                },
+                {
+                    "name": "Swagger docs",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api-docs",
+                            "host": ["{{baseUrl}}"],
+                            "path": ["api-docs"]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        { "key": "postId1", "value": "", "type": "string" },
+        { "key": "postId2", "value": "", "type": "string" },
+        { "key": "postId3", "value": "", "type": "string" },
+        { "key": "postId4", "value": "", "type": "string" },
+        { "key": "tag_programming", "value": "", "type": "string" },
+        { "key": "tag_travel", "value": "", "type": "string" },
+        { "key": "tag_food", "value": "", "type": "string" },
+        { "key": "tag_music", "value": "", "type": "string" },
+        { "key": "tag_fitness", "value": "", "type": "string" },
+        { "key": "postTagId", "value": "", "type": "string" }
+    ]
+}

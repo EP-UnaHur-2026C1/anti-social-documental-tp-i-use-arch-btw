@@ -1,25 +1,17 @@
 const { Post } = require('../models');
 
-const getVisibleCommentsWhere = () => {
-    const months = Number(process.env.COMMENT_VISIBILITY_MONTHS) || 6;
-    const cutoff = new Date();
-    cutoff.setMonth(cutoff.getMonth() - months);
-    return { dateTime: { $gte: cutoff } };
-};
-
 class PostRepository {
-    async findAll() {
-        return Post.find().populate ({
-                            path: 'comments',
-                            match: getVisibleCommentsWhere()
-                                    }).lean();
+    async findAll(page = 1, limit = 20) {
+        const skip = (page - 1) * limit;
+        const [data, total] = await Promise.all([
+            Post.find().sort({ dateTime: -1 }).skip(skip).limit(limit).lean(),
+            Post.countDocuments(),
+        ]);
+        return { data, total };
     }
 
     async findById(id) {
-        return Post.findOne({ _id:id }).populate ({
-                            path: 'comments',
-                            match: getVisibleCommentsWhere()
-                                    }).lean();
+        return Post.findOne({ _id: id }).lean();
     }
 
     async create(data) {
@@ -28,7 +20,7 @@ class PostRepository {
 
     async update(id, data) {
         const post = await Post.findById(id);
-        
+
         if (!post) return null;
 
         Object.assign(post, data);

@@ -14,13 +14,23 @@ class UserService {
             );
         }
 
+        const existingEmail = await UserRepository.findByEmail(
+            userData.email
+        );
+
+        if (existingEmail) {
+            throw new AppError(
+                'El nickName o el email ya están registrados.',
+                409
+            );
+        }
+
         const newUser = await UserRepository.create(userData);
         return newUser;
     }
 
-    async getAllUsers() {
-        const users = await UserRepository.getTotalUsers();
-        return users;
+    async getAllUsers(page = 1, limit = 20) {
+        return UserRepository.getAll(page, limit);
     }
 
     async getUserByNickName(nickName) {
@@ -34,46 +44,46 @@ class UserService {
     }
 
     async updateUser(nickName, userData) {
-        const updatedUser = await UserRepository.updateByNickName(
+        const result = await UserRepository.updateByNickName(
             nickName,
             userData
         );
 
-        if (!updatedUser) {
+        if (!result.matchedCount) {
             throw new AppError('Usuario no encontrado.', 404);
         }
 
-        return updatedUser;
+        return result;
     }
 
     async deleteUser(nickName) {
-        const deletedUser = await UserRepository.deleteByNickName(nickName);
+        const result = await UserRepository.deleteByNickName(nickName);
 
-        if (!deletedUser) {
+        if (!result.deletedCount) {
             throw new AppError('Usuario no encontrado.', 404);
         }
 
-        return deletedUser;
+        return result;
     }
 
     async getUserPosts(nickName) {
-        const user = await UserRepository.getUserPosts(nickName);
+        const user = await UserRepository.findByNickName(nickName);
 
         if (!user) {
             throw new AppError('Usuario no encontrado.', 404);
         }
 
-        return user.posts || [];
+        return UserRepository.getUserPosts(nickName);
     }
 
     async getUserComments(nickName) {
-        const user = await UserRepository.getUserComments(nickName);
+        const user = await UserRepository.findByNickName(nickName);
 
         if (!user) {
             throw new AppError('Usuario no encontrado.', 404);
         }
 
-        return user.comments || [];
+        return UserRepository.getUserComments(nickName);
     }
 }
 

@@ -33,10 +33,10 @@ app.listen(PORT, async () => {
 });
 
 /*
-*
-* 1. docker compose up -d
-* 2. pnpm install
-* 3. Crear .env (copiar .env.example)
-* 4. pnpm run dev
-* 4. docker compose down
-* */
+ *
+ * 1. docker compose up -d
+ * 2. pnpm install
+ * 3. Crear .env (copiar .env.example)
+ * 4. pnpm run dev
+ * 4. docker compose down
+ * */

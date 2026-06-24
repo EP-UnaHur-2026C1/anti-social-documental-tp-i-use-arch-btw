@@ -1,0 +1,694 @@
+openapi: 3.0.0
+info:
+    title: Anti Social Documental API
+    version: 1.0.0
+    description: API documentation for the Anti-Social Documental Network
+
+servers:
+    - url: http://localhost:3000
+      description: Development server
+
+paths:
+    /api/users:
+        get:
+            summary: Obtiene todos los usuarios
+            tags: [Users]
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 20
+            responses:
+                '200':
+                    description: Lista de usuarios
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/User'
+                                    page:
+                                        type: integer
+                                    limit:
+                                        type: integer
+                                    total:
+                                        type: integer
+        post:
+            summary: Crea un nuevo usuario
+            tags: [Users]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [nickName, email, name]
+                            properties:
+                                nickName:
+                                    type: string
+                                    description: ID del usuario
+                                email:
+                                    type: string
+                                    format: email
+                                name:
+                                    type: string
+                                surname:
+                                    type: string
+            responses:
+                '201':
+                    description: Usuario creado
+                '409':
+                    description: Conflicto - usuario ya existe
+
+    /api/users/{nickName}:
+        get:
+            summary: Obtener usuario por nickName
+            tags: [Users]
+            parameters:
+                - in: path
+                  name: nickName
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Usuario encontrado
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/User'
+        put:
+            summary: Actualizar usuario
+            tags: [Users]
+            parameters:
+                - in: path
+                  name: nickName
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                email:
+                                    type: string
+                                    format: email
+                                name:
+                                    type: string
+                                surname:
+                                    type: string
+            responses:
+                '200':
+                    description: Usuario actualizado
+        delete:
+            summary: Eliminar usuario
+            tags: [Users]
+            parameters:
+                - in: path
+                  name: nickName
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '204':
+                    description: Usuario eliminado
+
+    /api/users/{nickName}/posts:
+        get:
+            summary: Obtener posts de un usuario
+            tags: [Users]
+            parameters:
+                - in: path
+                  name: nickName
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Lista de posts
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Post'
+
+    /api/users/{nickName}/comments:
+        get:
+            summary: Obtener comentarios de un usuario
+            tags: [Users]
+            parameters:
+                - in: path
+                  name: nickName
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Lista de comentarios
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Comment'
+
+    /api/posts:
+        get:
+            summary: Obtener todos los posts
+            tags: [Posts]
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 20
+            responses:
+                '200':
+                    description: Lista de posts obtenida
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/Post'
+                                    page:
+                                        type: integer
+                                    limit:
+                                        type: integer
+                                    total:
+                                        type: integer
+        post:
+            summary: Crea un nuevo post
+            tags: [Posts]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [user_nickName, description]
+                            properties:
+                                user_nickName:
+                                    type: string
+                                description:
+                                    type: string
+                                images:
+                                    type: array
+                                    items:
+                                        type: string
+                                    description: URLs de imágenes
+                                tags:
+                                    type: array
+                                    items:
+                                        type: string
+                                    description: Nombres de etiquetas
+            responses:
+                '201':
+                    description: Post creado correctamente
+
+    /api/posts/{id}:
+        get:
+            summary: Obtener un post por su ID
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Detalle del post
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Post'
+        put:
+            summary: Actualiza un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                description:
+                                    type: string
+            responses:
+                '200':
+                    description: Post actualizado
+        delete:
+            summary: Elimina un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '204':
+                    description: Post eliminado
+
+    /api/posts/{id}/comments:
+        get:
+            summary: Obtener comentarios de un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 20
+            responses:
+                '200':
+                    description: Lista de comentarios del post
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Comment'
+
+    /api/posts/{id}/images:
+        post:
+            summary: Añadir una imagen a un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [url]
+                            properties:
+                                url:
+                                    type: string
+                                    description: URL de la imagen
+            responses:
+                '201':
+                    description: Imagen añadida
+
+    /api/posts/{id}/images/{imageId}:
+        delete:
+            summary: Eliminar una imagen de un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                - in: path
+                  name: imageId
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '204':
+                    description: Imagen eliminada
+
+    /api/posts/{id}/tags:
+        post:
+            summary: Añadir una etiqueta a un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [tag_id]
+                            properties:
+                                tag_id:
+                                    type: string
+                                    description: ID de la etiqueta
+            responses:
+                '201':
+                    description: Etiqueta añadida
+
+    /api/posts/{id}/tags/{tagId}:
+        delete:
+            summary: Eliminar una etiqueta de un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+                - in: path
+                  name: tagId
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '204':
+                    description: Etiqueta eliminada
+
+    /api/comments:
+        get:
+            summary: Obtiene todos los comentarios
+            tags: [Comments]
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 20
+            responses:
+                '200':
+                    description: Lista de comentarios
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/Comment'
+                                    page:
+                                        type: integer
+                                    limit:
+                                        type: integer
+                                    total:
+                                        type: integer
+        post:
+            summary: Crea un nuevo comentario
+            tags: [Comments]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [content, user_nickName, post_id]
+                            properties:
+                                content:
+                                    type: string
+                                user_nickName:
+                                    type: string
+                                post_id:
+                                    type: string
+            responses:
+                '201':
+                    description: Comentario creado
+
+    /api/comments/{id}:
+        put:
+            summary: Actualiza un comentario
+            tags: [Comments]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                content:
+                                    type: string
+            responses:
+                '200':
+                    description: Comentario actualizado
+        delete:
+            summary: Elimina un comentario
+            tags: [Comments]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Comentario eliminado
+
+    /api/tags:
+        get:
+            summary: Obtener todas las etiquetas
+            tags: [Tags]
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 20
+            responses:
+                '200':
+                    description: Lista de etiquetas obtenida
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/Tag'
+                                    page:
+                                        type: integer
+                                    limit:
+                                        type: integer
+                                    total:
+                                        type: integer
+        post:
+            summary: Crear una nueva etiqueta
+            tags: [Tags]
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [name]
+                            properties:
+                                name:
+                                    type: string
+            responses:
+                '201':
+                    description: Etiqueta creada con éxito
+
+    /api/tags/{id}:
+        delete:
+            summary: Eliminar una etiqueta
+            tags: [Tags]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '204':
+                    description: Etiqueta eliminada
+
+    /api/follow/{nick}/followers:
+        get:
+            summary: Obtener seguidores de un usuario
+            tags: [Follows]
+            parameters:
+                - in: path
+                  name: nick
+                  required: true
+                  schema:
+                      type: string
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 20
+            responses:
+                '200':
+                    description: Lista de seguidores
+
+    /api/follow/{nick}/following:
+        get:
+            summary: Obtener usuarios que sigue un usuario
+            tags: [Follows]
+            parameters:
+                - in: path
+                  name: nick
+                  required: true
+                  schema:
+                      type: string
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 20
+            responses:
+                '200':
+                    description: Lista de usuarios seguidos
+
+    /api/follow/{followerNickName}/{followingNickName}:
+        post:
+            summary: Seguir a un usuario
+            tags: [Follows]
+            parameters:
+                - in: path
+                  name: followerNickName
+                  required: true
+                  schema:
+                      type: string
+                - in: path
+                  name: followingNickName
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Usuario seguido correctamente
+        delete:
+            summary: Dejar de seguir a un usuario
+            tags: [Follows]
+            parameters:
+                - in: path
+                  name: followerNickName
+                  required: true
+                  schema:
+                      type: string
+                - in: path
+                  name: followingNickName
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Dejaste de seguir al usuario
+
+components:
+    schemas:
+        User:
+            type: object
+            properties:
+                _id:
+                    type: string
+                    description: NickName del usuario
+                email:
+                    type: string
+                    format: email
+                name:
+                    type: string
+                surname:
+                    type: string
+                followers:
+                    type: integer
+                    default: 0
+                nickName:
+                    type: string
+
+        Post:
+            type: object
+            properties:
+                _id:
+                    type: string
+                user_nickName:
+                    type: string
+                    description: NickName del autor
+                description:
+                    type: string
+                dateTime:
+                    type: string
+                    format: date-time
+
+        Comment:
+            type: object
+            properties:
+                _id:
+                    type: string
+                user_nickName:
+                    type: string
+                post_id:
+                    type: string
+                content:
+                    type: string
+                dateTime:
+                    type: string
+                    format: date-time
+                visible:
+                    type: boolean
+
+        Tag:
+            type: object
+            properties:
+                _id:
+                    type: string
+                name:
+                    type: string

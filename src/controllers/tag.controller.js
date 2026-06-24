@@ -1,6 +1,7 @@
 const tagService = require('../service/tagService');
 const catchAsync = require('../middlewares/catchAsync');
 const { created, noContent, ok } = require('../helpers/response');
+const { paginated } = require('../helpers/pagination');
 
 exports.createTag = catchAsync(async (req, res) => {
     const tag = await tagService.createTag(req.body);
@@ -8,8 +9,10 @@ exports.createTag = catchAsync(async (req, res) => {
 });
 
 exports.getTags = catchAsync(async (req, res) => {
-    const tags = await tagService.getAllTags();
-    return ok(res, tags);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const { data, total } = await tagService.getAllTags(page, limit);
+    return paginated(res, data, total, page, limit);
 });
 
 exports.deleteTag = catchAsync(async (req, res) => {

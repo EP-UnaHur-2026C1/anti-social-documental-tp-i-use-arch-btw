@@ -1,15 +1,18 @@
 const userService = require('../service/userService');
 const catchAsync = require('../middlewares/catchAsync');
 const { created, success, noContent, ok } = require('../helpers/response');
+const { paginated } = require('../helpers/pagination');
 
 exports.createUser = catchAsync(async (req, res) => {
     const newUser = await userService.createUser(req.body);
-    return created(res, newUser, '✅ Usuario creado con éxito.');
+    return created(res, newUser, 'Usuario creado con éxito.');
 });
 
 exports.getUsers = catchAsync(async (req, res) => {
-    const users = await userService.getAllUsers();
-    return ok(res, users);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const { data, total } = await userService.getAllUsers(page, limit);
+    return paginated(res, data, total, page, limit);
 });
 
 exports.getUserByNickName = catchAsync(async (req, res) => {

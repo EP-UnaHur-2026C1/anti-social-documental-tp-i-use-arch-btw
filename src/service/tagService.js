@@ -1,3 +1,4 @@
+const AppError = require('../helpers/AppError');
 const TagRepository = require('../repositories/TagRepository');
 
 class TagService {
@@ -6,17 +7,16 @@ class TagService {
         return tag;
     }
 
-    async getAllTags() {
-        const tags = await TagRepository.findAll();
-        return tags;
+    async getAllTags(page = 1, limit = 20) {
+        return TagRepository.findAll(page, limit);
     }
 
     async deleteTag(id) {
-        const deleted = await TagRepository.deleteById(id);
-        if (!deleted) {
-            throw new Error('Etiqueta no encontrada.');
+        const result = await TagRepository.deleteById(id);
+        if (!result.deletedCount) {
+            throw new AppError('Etiqueta no encontrada.', 404);
         }
-        return deleted;
+        return result;
     }
 }
 

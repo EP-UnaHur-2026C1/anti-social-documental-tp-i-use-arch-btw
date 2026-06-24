@@ -1,10 +1,13 @@
 const postService = require('../service/postService');
 const catchAsync = require('../middlewares/catchAsync');
 const { created, success, noContent, ok } = require('../helpers/response');
+const { paginated } = require('../helpers/pagination');
 
 exports.getAllPosts = catchAsync(async (req, res) => {
-    const posts = await postService.getAllPosts();
-    return ok(res, posts);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const { data, total } = await postService.getAllPosts(page, limit);
+    return paginated(res, data, total, page, limit);
 });
 
 exports.getPostById = catchAsync(async (req, res) => {
@@ -47,4 +50,11 @@ exports.addPostTag = catchAsync(async (req, res) => {
 exports.removePostTag = catchAsync(async (req, res) => {
     await postService.removePostTag(req.params.id, req.params.tagId);
     return noContent(res);
+});
+
+exports.getPostComments = catchAsync(async (req, res) => {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const data = await postService.getPostComments(req.params.id, page, limit);
+    return ok(res, data);
 });

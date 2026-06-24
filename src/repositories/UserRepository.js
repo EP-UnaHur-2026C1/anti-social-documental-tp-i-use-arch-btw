@@ -23,20 +23,33 @@ class UserRepository {
         return User.deleteOne({ _id: nickName });
     }
 
-    async getTotalUsers() {
-        return User.countDocuments({});
+    async getAll(page = 1, limit = 20) {
+        const skip = (page - 1) * limit;
+        const [data, total] = await Promise.all([
+            User.find({}).skip(skip).limit(limit).lean(),
+            User.countDocuments(),
+        ]);
+        return { data, total };
     }
 
     async findByNickName(nickName) {
         return User.findOne({ _id: nickName }).lean();
     }
 
-    async getUserPosts(nickName) {
-        return Post.find({ user_nickName: nickName }).lean();
+    async findByEmail(email) {
+        return User.findOne({ email }).lean();
+    }
+
+    async getUserPosts(nickName, page = 1, limit = 20) {
+        const skip = (page - 1) * limit;
+        return Post.find({ user_nickName: nickName }).sort({ dateTime: -1 }).skip(skip).limit(limit).lean();
     }
 
     async getUserComments(nickName) {
-        return Comment.find({ user_nickName: nickName }).lean();
+        const months = Number(process.env.COMMENT_VISIBILITY_MONTHS) || 6;
+        const cutoff = new Date();
+        cutoff.setMonth(cutoff.getMonth() - months);
+        return Comment.find({ user_nickName: nickName, dateTime: { $gte: cutoff } }).lean();
     }
 }
 
