@@ -1,7 +1,8 @@
 const express = require('express');
+require('dotenv').config();
+const cors = require('cors');
 const app = express();
 const { connectToDatabase } = require('./config/db');
-require('dotenv').config();
 const userRoutes = require('./routes/user.routes');
 const postRoutes = require('./routes/post.routes');
 const commentRoutes = require('./routes/comment.routes');
@@ -12,6 +13,7 @@ const swaggerSpec = require('./swagger');
 const errorHandler = require('./middlewares/errorHandler.middleware');
 const PORT = process.env.PORT || 3000;
 
+app.use(cors({ origin: 'http://localhost:5173' }));
 app.use(express.json());
 
 app.use('/api/users', userRoutes);
@@ -36,7 +38,7 @@ app.listen(PORT, async () => {
  *
  * 1. docker compose up -d
  * 2. pnpm install
- * 3. Crear .env (copiar .env.example)
+ * 3. Crear .env
  * 4. pnpm run dev
  * 4. docker compose down
  * */
