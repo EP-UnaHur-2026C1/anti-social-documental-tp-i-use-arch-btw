@@ -9,6 +9,7 @@
 ![pnpm](https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white)
 ![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white)
 ![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=for-the-badge&logo=prettier&logoColor=black)
+![Mongo Express](https://img.shields.io/badge/Mongo%20Express-13AA52?style=for-the-badge&logo=mongodb&logoColor=white)
 
 # UnaHur Anti-Social Net
 
@@ -81,7 +82,7 @@ pnpm install
 # 3. Configurás las variables de entorno (copiás el .env.example)
 cp .env.example .env
 
-# 4. Levantás MongoDB con Docker
+# 4. Levantás MongoDB y Mongo Express con Docker
 docker compose up -d
 
 # 5. Lo prendés
@@ -89,6 +90,15 @@ pnpm run dev
 ```
 
 El server arranca en `http://localhost:3000` y la docu de Swagger en `http://localhost:3000/api-docs`.
+
+Mongo Express queda disponible en `http://localhost:8081` y sirve para visualizar la base de datos de MongoDB desde el navegador.
+
+Credenciales de Mongo Express:
+
+* Usuario: `admin`
+* Contraseña: `admin`
+
+La base de datos propia del proyecto es `anti-social`.
 
 ## Variables de Entorno
 
