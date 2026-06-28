@@ -26,14 +26,14 @@ class UserRepository {
     async getAll(page = 1, limit = 20) {
         const skip = (page - 1) * limit;
         const [data, total] = await Promise.all([
-            User.find({}).skip(skip).limit(limit).lean(),
+            User.find({}).skip(skip).limit(limit),
             User.countDocuments(),
         ]);
         return { data, total };
     }
 
     async findByNickName(nickName) {
-        return User.findOne({ _id: nickName }).lean();
+        return User.findOne({ _id: nickName });
     }
 
     async findByEmail(email) {

@@ -25,7 +25,7 @@ exports.updateUser = catchAsync(async (req, res) => {
         req.params.nickName,
         req.body
     );
-    return success(res, updatedUser, 'Usuario actualizado con éxito.');
+    return ok(res, updatedUser);
 });
 
 exports.deleteUser = catchAsync(async (req, res) => {

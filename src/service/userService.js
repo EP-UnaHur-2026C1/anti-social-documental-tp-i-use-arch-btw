@@ -53,7 +53,7 @@ class UserService {
             throw new AppError('Usuario no encontrado.', 404);
         }
 
-        return result;
+        return this.getUserByNickName(nickName);
     }
 
     async deleteUser(nickName) {
