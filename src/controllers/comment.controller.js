@@ -23,6 +23,11 @@ exports.getComments = catchAsync(async (req, res) => {
     return paginated(res, data, total, page, limit);
 });
 
+exports.getCommentById = catchAsync(async (req, res) => {
+    const comment = await commentService.getCommentById(req.params.id);
+    return ok(res, comment);
+});
+
 exports.deleteComment = catchAsync(async (req, res) => {
     await commentService.deleteComment(req.params.id);
     return noContent(res);

@@ -1,8 +1,9 @@
 const AppError = require('../helpers/AppError');
 const PostRepository = require('../repositories/PostRepository');
 const PostImageRepository = require('../repositories/PostImageRepository');
+const PostTagRepository = require('../repositories/PostTagRepository');
 const CommentRepository = require('../repositories/CommentRepository');
-const { User, Tag, PostTag } = require('../models');
+const { User, Tag, PostTag, PostImage, Comment } = require('../models');
 
 class PostService {
     async getAllPosts(page = 1, limit = 20) {
@@ -57,11 +58,16 @@ class PostService {
     }
 
     async deletePost(id) {
-        const result = await PostRepository.deleteById(id);
-        if (!result.deletedCount) {
+        const post = await PostRepository.findById(id);
+        if (!post) {
             throw new AppError('Post no encontrado.', 404);
         }
-        return result;
+        await Promise.all([
+            PostImage.deleteMany({ post_id: id }),
+            PostTag.deleteMany({ post_id: id }),
+            Comment.deleteMany({ post_id: id }),
+        ]);
+        return PostRepository.deleteById(id);
     }
 
     async addPostImage(postId, url) {
@@ -76,12 +82,31 @@ class PostService {
         return image;
     }
 
-    async removePostImage(imageId) {
-        const result = await PostImageRepository.deleteById(imageId);
-        if (!result.deletedCount) {
+    async removePostImage(postId, imageId) {
+        const image = await PostImageRepository.findById(imageId);
+        if (!image) {
             throw new AppError('Imagen no encontrada.', 404);
         }
-        return result;
+        if (image.post_id.toString() !== postId.toString()) {
+            throw new AppError('La imagen no pertenece al post especificado.', 400);
+        }
+        return PostImageRepository.deleteById(imageId);
+    }
+
+    async getPostTags(postId) {
+        const post = await PostRepository.findById(postId);
+        if (!post) {
+            throw new AppError('Post no encontrado.', 404);
+        }
+        return PostTagRepository.findByPostId(postId);
+    }
+
+    async getPostImages(postId) {
+        const post = await PostRepository.findById(postId);
+        if (!post) {
+            throw new AppError('Post no encontrado.', 404);
+        }
+        return PostImageRepository.findByPostId(postId);
     }
 
     async addPostTag(postId, tagId) {
@@ -101,10 +126,7 @@ class PostService {
     }
 
     async removePostTag(postId, tagId) {
-        const result = await PostTag.deleteOne({
-            post_id: postId,
-            tag_id: tagId,
-        });
+        const result = await PostTagRepository.deleteByPostIdAndTagId(postId, tagId);
         if (!result.deletedCount) {
             throw new AppError('Relación post-etiqueta no encontrada.', 404);
         }

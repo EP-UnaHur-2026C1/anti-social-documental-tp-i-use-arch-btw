@@ -1,4 +1,4 @@
-const { User, Comment, Post } = require('../models');
+const { User, Follow, Post, Comment } = require('../models');
 
 class UserRepository {
     async create(userData) {
@@ -26,18 +26,35 @@ class UserRepository {
     async getAll(page = 1, limit = 20) {
         const skip = (page - 1) * limit;
         const [data, total] = await Promise.all([
-            User.find({}).skip(skip).limit(limit),
+            this._enrichUsers(User.aggregate([{ $skip: skip }, { $limit: limit }])),
             User.countDocuments(),
         ]);
         return { data, total };
     }
 
     async findByNickName(nickName) {
-        return User.findOne({ _id: nickName });
+        const [user] = await this._enrichUsers(User.aggregate([{ $match: { _id: nickName } }]));
+        return user || null;
     }
 
     async findByEmail(email) {
         return User.findOne({ email }).lean();
+    }
+
+    async _enrichUsers(pipeline) {
+        const enriched = await pipeline
+            .lookup({ from: 'follows', let: { nick: '$_id' }, pipeline: [{ $match: { $expr: { $eq: ['$follower_nickName', '$$nick'] } } }, { $count: 'count' }], as: 'followingCalc' })
+            .lookup({ from: 'posts', let: { nick: '$_id' }, pipeline: [{ $match: { $expr: { $eq: ['$user_nickName', '$$nick'] } } }, { $count: 'count' }], as: 'postsCalc' })
+            .lookup({ from: 'comments', let: { nick: '$_id' }, pipeline: [{ $match: { $expr: { $eq: ['$user_nickName', '$$nick'] } } }, { $count: 'count' }], as: 'commentsCalc' });
+        return enriched.map(u => ({
+            ...u,
+            following: u.followingCalc?.[0]?.count ?? 0,
+            postsCount: u.postsCalc?.[0]?.count ?? 0,
+            commentsCount: u.commentsCalc?.[0]?.count ?? 0,
+            followingCalc: undefined,
+            postsCalc: undefined,
+            commentsCalc: undefined,
+        }));
     }
 
     async getUserPosts(nickName, page = 1, limit = 20) {

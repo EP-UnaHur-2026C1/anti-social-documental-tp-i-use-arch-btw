@@ -37,8 +37,18 @@ exports.addPostImage = catchAsync(async (req, res) => {
 });
 
 exports.removePostImage = catchAsync(async (req, res) => {
-    await postService.removePostImage(req.params.imageId);
+    await postService.removePostImage(req.params.id, req.params.imageId);
     return noContent(res);
+});
+
+exports.getPostTags = catchAsync(async (req, res) => {
+    const tags = await postService.getPostTags(req.params.id);
+    return ok(res, tags);
+});
+
+exports.getPostImages = catchAsync(async (req, res) => {
+    const images = await postService.getPostImages(req.params.id);
+    return ok(res, images);
 });
 
 exports.addPostTag = catchAsync(async (req, res) => {

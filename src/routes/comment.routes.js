@@ -5,9 +5,12 @@ const {
     updateComment,
     deleteComment,
     getComments,
+    getCommentById,
 } = require('../controllers/comment.controller');
 
 router.get('/', getComments);
+
+router.get('/:id', getCommentById);
 
 router.put('/:id', updateComment);
 

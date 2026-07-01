@@ -18,6 +18,10 @@ class TagRepository {
         return Tag.findOne({ _id: id }).lean();
     }
 
+    async update(id, data) {
+        return Tag.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
+    }
+
     async deleteById(id) {
         return Tag.deleteOne({ _id: id });
     }

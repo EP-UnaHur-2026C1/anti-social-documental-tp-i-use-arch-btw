@@ -15,6 +15,16 @@ exports.getTags = catchAsync(async (req, res) => {
     return paginated(res, data, total, page, limit);
 });
 
+exports.getTagById = catchAsync(async (req, res) => {
+    const tag = await tagService.getTagById(req.params.id);
+    return ok(res, tag);
+});
+
+exports.updateTag = catchAsync(async (req, res) => {
+    const tag = await tagService.updateTag(req.params.id, req.body);
+    return ok(res, tag, 'Etiqueta actualizada con éxito.');
+});
+
 exports.deleteTag = catchAsync(async (req, res) => {
     await tagService.deleteTag(req.params.id);
     return noContent(res);

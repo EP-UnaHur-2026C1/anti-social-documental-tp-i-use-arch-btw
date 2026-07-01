@@ -11,6 +11,22 @@ class TagService {
         return TagRepository.findAll(page, limit);
     }
 
+    async getTagById(id) {
+        const tag = await TagRepository.findById(id);
+        if (!tag) {
+            throw new AppError('Etiqueta no encontrada.', 404);
+        }
+        return tag;
+    }
+
+    async updateTag(id, data) {
+        const tag = await TagRepository.update(id, data);
+        if (!tag) {
+            throw new AppError('Etiqueta no encontrada.', 404);
+        }
+        return tag;
+    }
+
     async deleteTag(id) {
         const result = await TagRepository.deleteById(id);
         if (!result.deletedCount) {

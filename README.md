@@ -124,6 +124,8 @@ La base de datos propia del proyecto es `anti-social`.
 - `GET /api/posts` — Lista todos los posts (paginado: `?page=1&limit=20`)
 - `GET /api/posts/:id` — Busca un post por ID
 - `GET /api/posts/:id/comments` — Comentarios de un post (paginado)
+- `GET /api/posts/:id/images` — Imágenes de un post
+- `GET /api/posts/:id/tags` — Etiquetas de un post
 - `POST /api/posts` — Crea un post (con imágenes y tags opcionales)
 - `PUT /api/posts/:id` — Actualiza un post
 - `DELETE /api/posts/:id` — Borra un post
@@ -134,20 +136,23 @@ La base de datos propia del proyecto es `anti-social`.
 
 ### Comments
 - `GET /api/comments` — Lista comentarios (paginado: `?page=1&limit=20`)
+- `GET /api/comments/:id` — Busca un comentario por ID
 - `POST /api/comments` — Crea un comentario
 - `PUT /api/comments/:id` — Actualiza un comentario
 - `DELETE /api/comments/:id` — Borra un comentario
 
 ### Tags
 - `GET /api/tags` — Lista tags (paginado: `?page=1&limit=20`)
+- `GET /api/tags/:id` — Busca un tag por ID
 - `POST /api/tags` — Crea un tag
+- `PUT /api/tags/:id` — Actualiza un tag
 - `DELETE /api/tags/:id` — Borra un tag
 
 ### Follow
 - `GET /api/follow/:nick/followers` — Seguidores de un usuario (paginado)
 - `GET /api/follow/:nick/following` — Usuarios que sigue (paginado)
-- `POST /api/follow/:followerNick/:followingNick` — Seguir a alguien
-- `DELETE /api/follow/:followerNick/:followingNick` — Dejar de seguir
+- `POST /api/follow/:followerNickName/:followingNickName` — Seguir a alguien
+- `DELETE /api/follow/:followerNickName/:followingNickName` — Dejar de seguir
 
 > Para más detalle, cuando el server esté corriendo entra a `/api-docs`.
 

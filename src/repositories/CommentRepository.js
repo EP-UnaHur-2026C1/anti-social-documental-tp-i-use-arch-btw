@@ -28,6 +28,10 @@ class CommentRepository {
         return Comment.find(filter).sort({ dateTime: -1 }).skip(skip).limit(limit).lean();
     }
 
+    async findById(id) {
+        return Comment.findById(id).lean();
+    }
+
     async update(id, commentData) {
         const comment = await Comment.findById(id);
 

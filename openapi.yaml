@@ -309,6 +309,24 @@ paths:
                                     $ref: '#/components/schemas/Comment'
 
     /api/posts/{id}/images:
+        get:
+            summary: Obtener imágenes de un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Lista de imágenes del post
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/PostImage'
         post:
             summary: Añadir una imagen a un post
             tags: [Posts]
@@ -376,6 +394,24 @@ paths:
             responses:
                 '201':
                     description: Etiqueta añadida
+        get:
+            summary: Obtener etiquetas de un post
+            tags: [Posts]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Lista de etiquetas del post
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Tag'
 
     /api/posts/{id}/tags/{tagId}:
         delete:
@@ -451,6 +487,22 @@ paths:
                     description: Comentario creado
 
     /api/comments/{id}:
+        get:
+            summary: Obtener un comentario por ID
+            tags: [Comments]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Comentario encontrado
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Comment'
         put:
             summary: Actualiza un comentario
             tags: [Comments]
@@ -482,7 +534,7 @@ paths:
                   schema:
                       type: string
             responses:
-                '200':
+                '204':
                     description: Comentario eliminado
 
     /api/tags:
@@ -536,6 +588,44 @@ paths:
                     description: Etiqueta creada con éxito
 
     /api/tags/{id}:
+        get:
+            summary: Obtener una etiqueta por ID
+            tags: [Tags]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                '200':
+                    description: Etiqueta encontrada
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Tag'
+        put:
+            summary: Actualizar una etiqueta
+            tags: [Tags]
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [name]
+                            properties:
+                                name:
+                                    type: string
+            responses:
+                '200':
+                    description: Etiqueta actualizada
         delete:
             summary: Eliminar una etiqueta
             tags: [Tags]
@@ -691,4 +781,14 @@ components:
                 _id:
                     type: string
                 name:
+                    type: string
+
+        PostImage:
+            type: object
+            properties:
+                _id:
+                    type: string
+                url_image:
+                    type: string
+                post_id:
                     type: string
